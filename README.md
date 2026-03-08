@@ -411,7 +411,7 @@ export async function scrapeMapData(communityUrls) {
 ## 🌟 Related Actors by FlowExtractAPI
 
 ### 📚 Education & Community
-- **[Skool Scraper Pro](https://apify.com/dz_omar/skool-scraper?fpr=smcx63)**  Lessons, videos, posts, and attachments from Skool classrooms
+- **[Skool Scraper Pro](https://apify.com/dz_omar/skool-scraper-pro?fpr=smcx63)**  Lessons, videos, posts, and attachments from Skool classrooms
 
 ### 🎬 Video & Media
 - **[Loom Scraper](https://apify.com/dz_omar/loom-video-scraper?fpr=smcx63)**  Loom video & transcript extraction
