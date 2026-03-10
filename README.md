@@ -1,17 +1,16 @@
-# 🗺️ Skool Map Scraper
+# 🗺️ Skool Map Scraper  Extract Member Locations & Profiles
 
-Extract **member locations and full public profiles** from any Skool community map page  coordinates, names, bios, social links, levels, points, and more  organized and ready to use.
+**[Skool Map Scraper](https://apify.com/dz_omar/skool-map-scraper?fpr=smcx63)** extracts **member locations and full public profiles** from any Skool community map  coordinates, names, bios, social links, levels, points, and more  organized and ready to use.
 
 Perfect for **community owners**, **marketers**, and **researchers** who need geographic member data without manual effort.
 
-- A short guide on how to use **[Skool Map Scraper](https://apify.com/dz_omar/skool-map-scraper?fpr=smcx63)** Actors :
-
-[Skool Map Scraper](https://www.youtube.com/watch?v=fuxnnvB5538)
+https://www.youtube.com/watch?v=fuxnnvB5538
 
 ---
 
-## Why scrape Skool?
-Skool is a thriving community platform with hundreds of thousands of active members across diverse communities. It's an excellent source of data for building targeted lists, conducting market research, and identifying potential connections.
+## Why scrape Skool member locations?
+
+Skool is a thriving community platform with hundreds of thousands of active members across diverse communities. It's an excellent source of geographic and profile data for building targeted lists, conducting market research, and identifying potential connections.
 
 Here are just some of the ways you could use member data from Skool:
 
@@ -21,37 +20,38 @@ Here are just some of the ways you could use member data from Skool:
 - **Networking**: Discover potential collaborators, partners, or customers based on location and profile information
 - **Lead Generation**: Build prospect lists for sales and business development initiatives
 
+---
 
-## 🔍 What Gets Extracted
+## What data can Skool Map Scraper extract?
 
-### 👤 **Member Identity**
+### 👤 Member Identity
 - User ID, username, first name, last name, full name
 - Profile URL (`https://www.skool.com/@username`)
 
-### 🖼️ **Media**
+### 🖼️ Media
 - Full-size avatar URL
 - Thumbnail avatar URL
 
-### 📝 **Profile Data**
+### 📝 Profile Data
 - Bio text
 - Self-reported location (free text)
 - Community role (member / admin / moderator)
 - Level and points (from Skool's gamification system)
 
-### 📍 **Geographic Coordinates**
+### 📍 Geographic Coordinates
 - Latitude (WGS-84 decimal degrees)
 - Longitude (WGS-84 decimal degrees)
 
-### 📅 **Timestamps**
+### 📅 Timestamps
 - Joined at, approved at, last offline, account created at
 
-### 🔗 **Social Links**
+### 🔗 Social Links
 - Facebook, Instagram, LinkedIn, Twitter/X, Website, YouTube
 
-### 📊 **Community Stats**
+### 📊 Community Stats
 - Total groups member of, total groups created, shared groups count
 
-### 🏷️ **Metadata**
+### 🏷️ Metadata
 - Community slug, community ID, extraction timestamp
 
 ---
@@ -83,7 +83,7 @@ You can mix multiple URLs to extract from several communities in one run:
 
 #### `maxMembersPerCommunity` (Integer)
 - **Default**: `10`
--   To extract all members, just put a large number in "maxMembersPerCommunity": 1000000,.
+- To extract all members, set a large number: `"maxMembersPerCommunity": 1000000`
 - Maximum number of member profiles to extract from EACH community
 - Set to `100` → extracts up to 100 members from each community URL
 - Useful for testing before running full extractions on large communities (225,000+ members)
@@ -102,7 +102,7 @@ You can mix multiple URLs to extract from several communities in one run:
 
 ### 🔐 Authentication
 
-You **must be a member** of the community to access its map. The actor tries authentication in priority order:
+Do I need to be a Skool member to scrape? **Yes**  you must be a member of the community to access its map. The actor tries authentication in priority order:
 
 | Priority | Method | When to use |
 |---|---|---|
@@ -135,6 +135,23 @@ You **must be a member** of the community to access its map. The actor tries aut
 ```
 
 > ⚠️ Cookies expire. If extraction fails with 403 errors, export fresh cookies and re-run.
+
+---
+
+## 💰 Pricing
+
+How much does it cost to scrape Skool? Costs depend on your Apify subscription tier:
+
+| Event | FREE | BRONZE | SILVER | GOLD |
+|---|---|---|---|---|
+| Per member extracted | $0.0085 | $0.005 | $0.0045 | $0.003 |
+| Actor start (per GB memory) | $0.009 | $0.005 | $0.005 | $0.005 |
+
+**Example cost estimate:**
+- Extracting **1,000 members** on a FREE plan: ~$8.50 + $0.009 actor start
+- Extracting **1,000 members** on a GOLD plan: ~$3.00 + $0.005 actor start
+
+> 💡 Tip: Use `maxMembersPerCommunity: 10` first to test your setup before running a full extraction.
 
 ---
 
@@ -176,6 +193,8 @@ You **must be a member** of the community to access its map. The actor tries aut
 }
 ```
 
+---
+
 ## 🔄 Resumability
 
 The actor saves state after every batch of 50 users. If it crashes, gets migrated, or is aborted, it resumes exactly where it left off  no duplicate work.
@@ -196,11 +215,13 @@ For a 100,000-member community, this guarantees at most 50 duplicate rows on a c
 
 The actor routes all HTTP requests through a residential proxy to avoid IP blocks. The proxy is selected automatically based on your Apify pricing tier:
 
-| User tier | Proxy used | How |
-|---|---|---|
-| 💎 Paying |  Premium Residential | Faster, more reliable |
-| 🆓 Free | Apify RESIDENTIAL | Built-in, automatic |
-| ⚠️ None | Direct connection | No proxy configured |
+| User tier | Proxy used |
+|---|---|
+| 💎 Paying | Premium Residential  faster, more reliable |
+| 🆓 Free | Apify RESIDENTIAL  built-in, automatic |
+| ⚠️ None | Direct connection  no proxy configured |
+
+---
 
 ## 🚫 Access Error Handling
 
@@ -214,13 +235,10 @@ The actor detects exactly why a community map is inaccessible and gives clear, a
 | Empty map | Warning message | No members have pinned their location |
 
 ---
-## Actor Standby
 
-### 🔌 Standby Mode (Actor-to-Actor Streaming)
+## 🔌 Standby Mode (Actor-to-Actor Streaming)
 
 This actor supports **Standby mode**  it runs as a persistent HTTP server that another actor can call to stream member data in real-time via NDJSON.
-
-### How it works
 
 When launched in Standby mode, the actor starts an Express server and stays alive indefinitely. Another actor (the "caller") sends a POST request with community URLs, and this actor streams back member data line-by-line as it's enriched  no waiting for the full extraction to complete.
 
@@ -268,6 +286,41 @@ The last two fields are for **resumption**  if the connection drops, the caller 
 | `migrating` | Apify migrating the server | `membersSentSoFar`, `alreadyProcessedUserIds` |
 | `aborting` | Actor shutting down | `membersSentSoFar`, `alreadyProcessedUserIds` |
 
+---
+
+## ❓ Frequently Asked Questions
+
+**Do I need a paid Apify plan to use this actor?**
+No  the actor works on a free Apify plan. However, per-member costs are lower on paid tiers (see Pricing above).
+
+**How many members can I extract for free?**
+Apify's free tier includes $5 in monthly platform credits. At $0.0085 per member on the FREE tier, that covers roughly 580 member extractions per month before additional charges apply.
+
+**Is the Skool member map always available?**
+Only communities where the admin has enabled the map feature will have extractable location data. If a community's map is empty, no members have pinned their location.
+
+**Can I scrape multiple Skool communities in one run?**
+Yes  pass multiple URLs in the `communityUrl` array. The actor processes them sequentially and applies `maxMembersPerCommunity` to each one independently.
+
+**What happens if the extraction crashes mid-run?**
+The actor saves progress every 50 users. On restart, it resumes exactly where it left off with no duplicate data.
+
+---
+
+## ⚖️ Legal & Ethical Use
+
+This actor extracts **publicly visible profile data** from Skool community map pages  the same information any logged-in member can see in their browser. Users who pin their location on a Skool map are voluntarily sharing that information with other community members.
+
+**Please use this tool responsibly:**
+- Only extract data from communities you are a legitimate member of
+- Comply with [Skool's Terms of Service](https://www.skool.com/terms) and applicable data protection regulations (GDPR, CCPA, etc.)
+- Do not use extracted data for spam, harassment, or unsolicited outreach
+- If you are processing personal data of EU residents, ensure you have a lawful basis under GDPR
+
+For questions about a specific use case, contact us at [flowextractapi@outlook.com](mailto:flowextractapi@outlook.com).
+
+---
+
 ## 🤝 Support & Resources
 
 - 🌐 **Website**: [flowextractapi.com](https://flowextractapi.com)
@@ -286,7 +339,7 @@ The last two fields are for **resumption**  if the connection drops, the caller 
 
 ### 📚 Education & Community
 - **[Skool Scraper Pro](https://apify.com/dz_omar/skool-scraper-pro?fpr=smcx63)**  Lessons, videos, posts, and attachments from Skool classrooms
-- **[Skool Map Scraper ](https://apify.com/dz_omar/skool-map-scraper?fpr=smcx63)**  Member locations and profiles from Skool community maps
+- **[Skool Map Scraper](https://apify.com/dz_omar/skool-map-scraper?fpr=smcx63)**  Member locations and profiles from Skool community maps
 
 ### 🎬 Video & Media
 - **[Loom Scraper](https://apify.com/dz_omar/loom-video-scraper?fpr=smcx63)**  Loom video & transcript extraction
