@@ -4,7 +4,7 @@
 
 Perfect for **community owners**, **marketers**, and **researchers** who need geographic member data without manual effort.
 
-https://www.youtube.com/watch?v=fuxnnvB5538
+[![Watch the video](https://img.youtube.com/vi/fuxnnvB5538/maxresdefault.jpg)](https://www.youtube.com/watch?v=fuxnnvB5538)
 
 ---
 
