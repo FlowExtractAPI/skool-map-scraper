@@ -6,28 +6,21 @@ Perfect for **community owners**, **marketers**, and **researchers** who need ge
 
 - A short guide on how to use **[Skool Map Scraper](https://apify.com/dz_omar/skool-map-scraper?fpr=smcx63)** Actors :
 
-[Skool Map Scraper](https://www.youtube.com/watch?v=u-i-Korzf8w)
+[Skool Map Scraper](https://www.youtube.com/watch?v=fuxnnvB5538)
 
 ---
 
-## 🚀 Key Benefits & Use Cases
+## Why scrape Skool?
+Skool is a thriving community platform with hundreds of thousands of active members across diverse communities. It's an excellent source of data for building targeted lists, conducting market research, and identifying potential connections.
 
-### **📍 For Community Owners**
-- Map your members geographically to plan regional events or meetups
-- Export full member profiles with social links, bios, and engagement levels
-- Track community growth across regions
+Here are just some of the ways you could use member data from Skool:
 
-### **💼 For Marketers & Analysts**
-- Build geo-targeted audience segments from member coordinates
-- Analyze member distribution across countries and cities
-- Cross-reference social profiles (LinkedIn, Instagram, Twitter) for outreach
+- **Event Planning**: Build attendee lists and contact members for upcoming events or meetups
+- **Community Outreach**: Identify and reach out to members in specific geographic locations
+- **Market Research**: Analyze member profiles, interests, and engagement across communities
+- **Networking**: Discover potential collaborators, partners, or customers based on location and profile information
+- **Lead Generation**: Build prospect lists for sales and business development initiatives
 
-### **🎯 For Researchers**
-- Extract structured member data from any Skool community at scale
-- Study community demographics by location, role, and engagement level
-- Bulk-export 200,000+ member profiles with full metadata
-
----
 
 ## 🔍 What Gets Extracted
 
@@ -233,7 +226,7 @@ When launched in Standby mode, the actor starts an Express server and stays aliv
 
 The public URL:
 ```
-https://dz-omar--skool-map-scraper.apify.actor
+https://dz-omar--skool-map-scraper.apify.actor?token=***
 ```
 
 ### Endpoints
@@ -275,125 +268,6 @@ The last two fields are for **resumption**  if the connection drops, the caller 
 | `migrating` | Apify migrating the server | `membersSentSoFar`, `alreadyProcessedUserIds` |
 | `aborting` | Actor shutting down | `membersSentSoFar`, `alreadyProcessedUserIds` |
 
-### Example: Calling from Another Actor
-
-```javascript
-const MAP_SCRAPER_URL = 'https://dz-omar--skool-map-scraper.apify.actor';
-const HEARTBEAT_URL = `${MAP_SCRAPER_URL}/heartbeat`;
-const MAX_RECONNECT = 3;
-const RECONNECT_DELAY = 2000;
-
-// Wake up the standby actor
-async function ping() {
-    try {
-        await fetch(HEARTBEAT_URL, {
-            headers: { 'Authorization': `Bearer ${process.env.APIFY_TOKEN}` },
-        });
-    } catch (_) {}
-}
-
-// Single connection attempt  reads NDJSON stream
-async function fetchOnce(communityUrls, progress) {
-    await ping();
-
-    const response = await fetch(MAP_SCRAPER_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.APIFY_TOKEN}`,
-        },
-        body: JSON.stringify({
-            communityUrls,
-            email: 'your@email.com',
-            password: 'your-password',
-            maxMembersPerCommunity: 500,
-            alreadyProcessedUserIds: progress.processedUserIds,
-            startFromCommunityIndex: progress.communityIndex,
-        }),
-    });
-
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const heartbeat = setInterval(ping, 30000);
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    try {
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const line of lines) {
-                if (!line.trim()) continue;
-                const event = JSON.parse(line);
-
-                switch (event.type) {
-                    case 'log':
-                        console.log(`[MAP-SCRAPER] ${event.message}`);
-                        break;
-
-                    case 'batch':
-                        for (const member of event.members) {
-                            progress.allMembers.push(member);
-                            progress.processedUserIds.push(member.userId);
-                        }
-                        console.log(`Received ${event.batchSize} members (total: ${event.membersSentSoFar})`);
-                        break;
-
-                    case 'community_complete':
-                        progress.communityIndex++;
-                        console.log(`Done: ${event.communitySlug} (${event.membersSent} members)`);
-                        break;
-
-                    case 'complete':
-                        progress.completed = true;
-                        break;
-
-                    case 'migrating':
-                    case 'aborting':
-                        if (event.alreadyProcessedUserIds) {
-                            progress.processedUserIds = event.alreadyProcessedUserIds;
-                        }
-                        throw new Error(`Server ${event.type}  will reconnect`);
-
-                    case 'error':
-                        if (event.isRetryable) throw new Error(`Retryable: ${event.error}`);
-                        console.error(`Non-retryable: ${event.error}`);
-                        break;
-                }
-            }
-        }
-    } finally {
-        clearInterval(heartbeat);
-    }
-}
-
-// Main entry point with reconnect loop
-export async function scrapeMapData(communityUrls) {
-    const progress = { communityIndex: 0, processedUserIds: [], allMembers: [], completed: false };
-    let attempt = 0;
-
-    while (!progress.completed && attempt < MAX_RECONNECT) {
-        try {
-            await fetchOnce(communityUrls, progress);
-        } catch (error) {
-            attempt++;
-            console.error(`Attempt ${attempt}/${MAX_RECONNECT}: ${error.message}`);
-            if (attempt < MAX_RECONNECT) await new Promise(r => setTimeout(r, RECONNECT_DELAY));
-        }
-    }
-
-    return progress.allMembers;
-}
-```
-
----
-
 ## 🤝 Support & Resources
 
 - 🌐 **Website**: [flowextractapi.com](https://flowextractapi.com)
@@ -412,6 +286,7 @@ export async function scrapeMapData(communityUrls) {
 
 ### 📚 Education & Community
 - **[Skool Scraper Pro](https://apify.com/dz_omar/skool-scraper-pro?fpr=smcx63)**  Lessons, videos, posts, and attachments from Skool classrooms
+- **[Skool Map Scraper ](https://apify.com/dz_omar/skool-map-scraper?fpr=smcx63)**  Member locations and profiles from Skool community maps
 
 ### 🎬 Video & Media
 - **[Loom Scraper](https://apify.com/dz_omar/loom-video-scraper?fpr=smcx63)**  Loom video & transcript extraction
