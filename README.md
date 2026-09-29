@@ -4,21 +4,26 @@
 
 Perfect for **community owners**, **marketers**, and **researchers** who need geographic member data without manual effort.
 
-[![Watch the video](https://img.youtube.com/vi/fuxnnvB5538/maxresdefault.jpg)](https://www.youtube.com/watch?v=fuxnnvB5538)
+https://www.youtube.com/watch?v=fuxnnvB5538
 
 ---
 
-## Why scrape Skool member locations?
+## 🚀 Key Benefits & Use Cases
 
-Skool is a thriving community platform with hundreds of thousands of active members across diverse communities. It's an excellent source of geographic and profile data for building targeted lists, conducting market research, and identifying potential connections.
+### **📍 For Community Owners**
+- Map your members geographically to plan regional events or meetups
+- Export full member profiles with social links, bios, and engagement levels
+- Track community growth across regions
 
-Here are just some of the ways you could use member data from Skool:
+### **💼 For Marketers & Analysts**
+- Build geo-targeted audience segments from member coordinates
+- Analyze member distribution across countries and cities
+- Cross-reference social profiles (LinkedIn, Instagram, Twitter) for outreach
 
-- **Event Planning**: Build attendee lists and contact members for upcoming events or meetups
-- **Community Outreach**: Identify and reach out to members in specific geographic locations
-- **Market Research**: Analyze member profiles, interests, and engagement across communities
-- **Networking**: Discover potential collaborators, partners, or customers based on location and profile information
-- **Lead Generation**: Build prospect lists for sales and business development initiatives
+### **🎯 For Researchers**
+- Extract structured member data from any Skool community at scale
+- Study community demographics by location, role, and engagement level
+- Bulk-export 200,000+ member profiles with full metadata
 
 ---
 
@@ -41,6 +46,7 @@ Here are just some of the ways you could use member data from Skool:
 ### 📍 Geographic Coordinates
 - Latitude (WGS-84 decimal degrees)
 - Longitude (WGS-84 decimal degrees)
+- Country code (ISO 3166-1 alpha-2, e.g. `"US"`, `"GB"`, `"DZ"`)  derived offline via reverse-geocoding
 
 ### 📅 Timestamps
 - Joined at, approved at, last offline, account created at
@@ -100,41 +106,77 @@ You can mix multiple URLs to extract from several communities in one run:
 }
 ```
 
+### 🌍 Offline Country Filtering
+
+The scraper supports **offline country filtering** using reverse-geocoding on map coordinates  no extra API calls needed.
+
+When you select one or more countries in the `filterCountries` input, the actor reverse-geocodes each member's `[latitude, longitude]` coordinates locally (using the `which-country` package) **before** making any enrichment API calls. Members whose map pin falls outside the selected countries are skipped entirely, saving API credits and significantly speeding up large extractions.
+
+**How it works:**
+1. Member coordinates are fetched from the Skool map
+2. Each `[lat, lng]` pair is reverse-geocoded offline to a country code
+3. If the country is **not** in your filter list → member is skipped, no API call made
+4. If the country **matches** → full profile enrichment proceeds as normal
+5. Every output row includes a new **`countryCode`** field (ISO 3166-1 alpha-2, e.g. `"US"`, `"GB"`, `"DZ"`)
+
+**Key points:**
+- 🚫 No external geocoding API  fully offline, instant, zero extra cost
+- 💰 Skips enrichment API calls for out-of-filter members → saves credits on large communities
+- 🌐 Leave `filterCountries` empty to extract **all members regardless of country** (default behavior)
+- 🏷️ `countryCode` is always present in every output row, even when no filter is set
+
+> 💡 **Example:** Filtering a 50,000-member community to US-only members avoids enrichment calls for ~45,000 non-US members, cutting costs by up to 90%.
+
+---
+
+### 🔒 Credentials Security & Encryption
+
+Your password and cookies are sensitive credentials  they grant access to your Skool account. Here's how the Apify platform protects them:
+
+* **Encrypted at rest**
+  The `cookies` and `password` fields are marked as **secret inputs**.
+  When you save your Actor input, their values are automatically encrypted using **AES-256-GCM**, and the encryption key is further protected by a **2048-bit RSA key** unique to your account and this Actor.
+
+* **Decrypted only inside the Actor**
+  The encrypted values are only decrypted within the Actor's execution environment. No other Actor and no other user can access or decrypt your cookies or password.
+
+* **Never logged or exposed**
+  Secret input fields are never written to logs or displayed in the Apify Console UI. If accessed directly from storage, only encrypted ciphertext is visible.
+
+* **Isolated per user and Actor**
+  Encryption keys are unique to each user–Actor combination, ensuring complete isolation.
+
+**In short:** once you paste your password or cookies into their input fields, they are encrypted before storage and are only decrypted inside the secure Actor runtime  never accessible to anyone else.
+
+---
+
 ### 🔐 Authentication
 
-Do I need to be a Skool member to scrape? **Yes**  you must be a member of the community to access its map. The actor tries authentication in priority order:
+Some Skool communities require authentication to access classroom content.
 
-| Priority | Method | When to use |
-|---|---|---|
-| 1 | **Email + Password** | Easiest  just enter your Skool credentials |
-| 2 | **Browser Cookies** | Fallback if login fails, or if you prefer cookie-based auth |
-| 3 | **None** | Public communities only (most maps require membership) |
+| Method                             | How to use                       | When to use                              |
+| ---------------------------------- | -------------------------------- | ---------------------------------------- |
+| **Email + Password** (recommended) | Enter credentials in input       | Easiest and most reliable                |
+| **Browser Cookies**                | Export from your browser session | Use if login fails or for advanced cases |
+| **None**                           | No authentication                | Public communities only                  |
 
-#### Method 1  Email + Password (recommended)
+---
 
-```json
-{
-    "email": "you@example.com",
-    "password": "your-password"
-}
-```
+### 🍪 How to export your cookies (optional)
 
-#### Method 2  Browser Cookies (fallback)
+1. **Install the Cookie-Editor extension**
+   - [Chrome](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)
+   - [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cookie-editor/)
 
-1. Install the [Cookie-Editor extension](https://chrome.google.com/webstore/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm)
-2. Log in to Skool, navigate to your community
-3. Open Cookie-Editor → click Export → copy the JSON
-4. Paste into the `cookies` field:
+2. Log in to `skool.com` and open your community
+3. Open the extension → click **Export**
+4. Copy the JSON and paste it into the `cookies` field
 
-```json
-{
-    "cookies": [
-        { "name": "auth_token", "value": "your-token-value", "domain": ".skool.com" }
-    ]
-}
-```
+> ⚠️ **Security Notice**
+> Your cookies and password provide access to your account. They are treated as sensitive secrets and are never logged, exposed, or shared. For maximum safety, consider using a dedicated account.
 
-> ⚠️ Cookies expire. If extraction fails with 403 errors, export fresh cookies and re-run.
+> ⚠️ **Session Expiry**
+> Cookies expire over time. If extraction fails (e.g., 403 errors), export fresh cookies and re-run the Actor.
 
 ---
 
@@ -144,12 +186,11 @@ How much does it cost to scrape Skool? Costs depend on your Apify subscription t
 
 | Event | FREE | BRONZE | SILVER | GOLD |
 |---|---|---|---|---|
-| Per member extracted | $0.0085 | $0.005 | $0.0045 | $0.003 |
-| Actor start (per GB memory) | $0.009 | $0.005 | $0.005 | $0.005 |
+| Per member extracted | $0.005 | $0.003 | $0.002 | $0.0015 |
 
 **Example cost estimate:**
-- Extracting **1,000 members** on a FREE plan: ~$8.50 + $0.009 actor start
-- Extracting **1,000 members** on a GOLD plan: ~$3.00 + $0.005 actor start
+- Extracting **1,000 members** on a FREE plan: ~$5.00
+- Extracting **1,000 members** on a GOLD plan: ~$1.50
 
 > 💡 Tip: Use `maxMembersPerCommunity: 10` first to test your setup before running a full extraction.
 
@@ -174,6 +215,7 @@ How much does it cost to scrape Skool? Costs depend on your Apify subscription t
     "location": "Scottsdale, AZ",
     "latitude": 33.41689906,
     "longitude": -111.88929107,
+    "countryCode": "US",
     "role": "member",
     "level": 1,
     "points": 0,
@@ -294,7 +336,7 @@ The last two fields are for **resumption**  if the connection drops, the caller 
 No  the actor works on a free Apify plan. However, per-member costs are lower on paid tiers (see Pricing above).
 
 **How many members can I extract for free?**
-Apify's free tier includes $5 in monthly platform credits. At $0.0085 per member on the FREE tier, that covers roughly 580 member extractions per month before additional charges apply.
+Apify's free tier includes $5 in monthly platform credits. At $0.005 per member on the FREE tier, that covers roughly 1,000 member extractions per month before additional charges apply.
 
 **Is the Skool member map always available?**
 Only communities where the admin has enabled the map feature will have extractable location data. If a community's map is empty, no members have pinned their location.
@@ -305,19 +347,11 @@ Yes  pass multiple URLs in the `communityUrl` array. The actor processes them se
 **What happens if the extraction crashes mid-run?**
 The actor saves progress every 50 users. On restart, it resumes exactly where it left off with no duplicate data.
 
----
+**What is the `countryCode` field?**
+Every output row now includes a `countryCode` field (ISO 3166-1 alpha-2, e.g. `"US"`, `"GB"`, `"DZ"`). It is derived offline by reverse-geocoding the member's `[latitude, longitude]` coordinates using the `which-country` package  no external API, no extra cost.
 
-## ⚖️ Legal & Ethical Use
-
-This actor extracts **publicly visible profile data** from Skool community map pages  the same information any logged-in member can see in their browser. Users who pin their location on a Skool map are voluntarily sharing that information with other community members.
-
-**Please use this tool responsibly:**
-- Only extract data from communities you are a legitimate member of
-- Comply with [Skool's Terms of Service](https://www.skool.com/terms) and applicable data protection regulations (GDPR, CCPA, etc.)
-- Do not use extracted data for spam, harassment, or unsolicited outreach
-- If you are processing personal data of EU residents, ensure you have a lawful basis under GDPR
-
-For questions about a specific use case, contact us at [flowextractapi@outlook.com](mailto:flowextractapi@outlook.com).
+**Does country filtering save money?**
+Yes. When `filterCountries` is set, the actor skips full profile enrichment for members outside the selected countries. On a large community, this can reduce API costs by up to 90%.
 
 ---
 
@@ -330,7 +364,7 @@ For questions about a specific use case, contact us at [flowextractapi@outlook.c
 
 ### Social Media
 - 💼 **LinkedIn**: [flowextract-api](https://www.linkedin.com/in/flowextract-api/)
-- 🐦 **Twitter**: [@FlowExtractAPI](https://x.com/@FlowExtractAPI)
+- 🐦 **Twitter**: [@FlowExtractAPI](https://x.com/FlowExtractAPI)
 - 📱 **Facebook**: [flowextractapi](https://www.facebook.com/flowextractapi)
 
 ---
@@ -354,3 +388,15 @@ For questions about a specific use case, contact us at [flowextractapi@outlook.c
 ### 📱 Social & Ads
 - **[Facebook Ads Scraper Pro](https://apify.com/dz_omar/facebook-ads-scraper-pro?fpr=smcx63)**  Facebook Ad Library extraction
 - **[Google Ads Scraper](https://apify.com/dz_omar/google-ads-scraper?fpr=smcx63)**  Google Ads Transparency Center data
+
+---
+
+## ⚖️ Legal & Ethical Use
+
+This actor extracts **publicly visible profile data** from Skool community map pages  the same information any logged-in member can see in their browser. Users who pin their location on a Skool map are voluntarily sharing that information with other community members.
+
+**Please use this tool responsibly:**
+- Only extract data from communities you are a legitimate member of
+- Comply with [Skool's Terms of Service](https://www.skool.com/legal?t=terms) and applicable data protection regulations (GDPR, CCPA, etc.)
+- Do not use extracted data for spam, harassment, or unsolicited outreach
+- If you are processing personal data of EU residents, ensure you have a lawful basis under GDPR
